@@ -10,7 +10,7 @@ class Field:
         return str(self.value)
 
 class Name(Field):
-    # реалізація класу
+    #реалізація класу
         pass
 
 class Phone(Field):
