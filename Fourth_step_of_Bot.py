@@ -92,7 +92,7 @@ def get_upcoming_birthdays(self):
         if record.birthday:
             birthday = record.birthday.value.replace(year=today.year)
             if birthday < today:
-                birthday = birthday.replace(year=today.yrar +1)
+                birthday = birthday.replace(year=today.year + 1)
 
             if today <= birthday <= end_date:
                 if birthday.weekday() in [5,6]:
@@ -104,12 +104,16 @@ def get_upcoming_birthdays(self):
 
     
 def input_error(func):
-    def inner(*args):
+    def wrapper(*args, **kwargs):
         try:
-            return func(*args)
-        except (ValueError, IndexError) as e:
-            return f"Error: {e}"
-    return inner
+            return func(*args, **kwargs)
+        except IndexError:
+            return "Error: not enough input arguments", []
+        except ValueError:
+            return "Error: wrong value format", []
+        except Exception as e:
+            return f"Unexpected error: {e}", []
+    return wrapper
 
 
 @input_error
@@ -173,12 +177,20 @@ def show_birthday(args, book):
 @input_error
 def birthdays(args, book):
     upcoming = get_upcoming_birthdays(book)
-    return "\n".join(upcoming) if upcoming else "No birthdays in the next 7 days."
+    if not upcoming:
+        return "No birthdays in the next 7 days."
+    
+    result = []
+    for item in upcoming:
+        result.append(f"{item['name']} - {item['congratulation_date']}")
+    return "\n".join(result)
 
 
-
+@input_error
 def parse_input(user_input):
     parts = user_input.strip().split()
+    #if not parts:
+    #    raise ValueError('No coommand provided')
     command = parts[0].lower()
     return command, parts[1:]
 
